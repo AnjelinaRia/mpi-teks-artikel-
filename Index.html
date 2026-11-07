@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPI Bahasa Indonesia - Menganalisis Istilah Asing dalam Artikel Ilmiah</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        accent: {
+                            orange: '#f97316',
+                            amber: '#f59e0b',
+                            emerald: '#10b981',
+                            purple: '#8b5cf6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .ifp-btn {
+            transition: all 0.2s ease;
+        }
+        .ifp-btn:active {
+            transform: scale(0.96);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Top Navigation Bar / Header -->
+    <header class="bg-slate-800 border-b border-slate-700 text-white px-6 py-3 flex justify-between items-center z-50 sticky top-0 shadow-lg">
+        <div class="flex items-center space-x-3">
+            <!-- Logo Sekolah (SVG Embedded Vector) -->
+            <svg class="w-10 h-10 drop-shadow-md" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M250 20 L440 70 V240 C440 350 350 440 250 480 C150 440 60 350 60 240 V70 Z" fill="#2563EB" stroke="#00FF00" stroke-width="12"/>
+                <path d="M250 60 L262 98 L302 98 L270 121 L282 159 L250 136 L218 159 L230 121 L198 98 L238 98 Z" fill="#F59E0B"/>
+                <!-- Ribbon Top -->
+                <path d="M100 130 Q250 170 400 130 V165 Q250 205 100 165 Z" fill="#FFFFFF" stroke="#1E40AF" stroke-width="2"/>
+                <text x="250" y="152" fill="#1E40AF" font-family="sans-serif" font-weight="900" font-size="20" text-anchor="middle">SMP NEGERI 2 JENGAN DANUM</text>
+                <!-- Book -->
+                <path d="M250 340 Q300 290 370 300 V250 Q300 240 250 290 Q200 240 130 250 V300 Q200 290 250 340 Z" fill="#DBEAFE" stroke="#1D4ED8" stroke-width="4"/>
+                <!-- Torch Flame -->
+                <path d="M250 180 C230 210 230 240 250 260 C270 240 270 210 250 180 Z" fill="#EF4444"/>
+                <path d="M250 195 C240 215 240 235 250 248 C260 235 260 215 250 195 Z" fill="#F59E0B"/>
+                <path d="M238 250 H262 V305 H238 Z" fill="#EAB308"/>
+                <!-- Ribbon Bottom -->
+                <path d="M190 350 H310 V375 H190 Z" fill="#FFFFFF" stroke="#1E40AF" stroke-width="2"/>
+                <text x="250" y="367" fill="#1E40AF" font-family="sans-serif" font-weight="900" font-size="16" text-anchor="middle">KUTAI BARAT</text>
+            </svg>
+            <div>
+                <h1 class="font-bold text-lg leading-tight tracking-wide text-blue-300">MPI BAHASA INDONESIA SMP</h1>
+                <p class="text-xs text-slate-400">Analisis Teks Artikel Ilmiah: Istilah Asing</p>
+            </div>
+        </div>
+
+        <!-- Student Info Badge & Fullscreen Toggle -->
+        <div class="flex items-center space-x-4">
+            <div id="userInfoHeader" class="hidden md:flex items-center space-x-3 bg-slate-700/60 px-4 py-1.5 rounded-full border border-slate-600">
+                <i class="fa-solid fa-user-circle text-emerald-400 text-lg"></i>
+                <div class="text-xs">
+                    <span id="headerStudentName" class="font-semibold text-white block">Siswa</span>
+                    <span id="headerStudentSchool" class="text-slate-300 block text-[10px]">SMP N 2 Jengan Danum</span>
+                </div>
+            </div>
+            
+            <button onclick="toggleFullScreen()" class="ifp-btn bg-slate-700 hover:bg-slate-600 text-white p-2.5 rounded-xl border border-slate-600 flex items-center justify-center shadow" title="Layar Penuh (IFP)">
+                <i id="fullscreenIcon" class="fa-solid fa-expand text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 relative flex flex-col p-4 md:p-6 bg-slate-900 justify-center items-center">
+
+        <!-- 1. HALAMAN SAMBUTAN / DEPAN -->
+        <section id="page-welcome" class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col md:flex-row">
+            <div class="md:w-5/12 bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-900 p-8 text-white flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 opacity-15 w-40 h-40">
+                    <svg viewBox="0 0 500 500" class="w-full h-full"><path d="M250 20 L440 70 V240 C440 350 350 440 250 480 C150 440 60 350 60 240 V70 Z" fill="#FFF"/></svg>
+                </div>
+                <div class="z-10">
+                    <div class="flex items-center space-x-2 mb-3">
+                        <svg class="w-8 h-8" viewBox="0 0 500 500" fill="none">
+                            <path d="M250 20 L440 70 V240 C440 350 350 440 250 480 C150 440 60 350 60 240 V70 Z" fill="#2563EB" stroke="#00FF00" stroke-width="12"/>
+                            <path d="M250 60 L262 98 L302 98 L270 121 L282 159 L250 136 L218 159 L230 121 L198 98 L238 98 Z" fill="#F59E0B"/>
+                        </svg>
+                        <span class="bg-sky-400/30 text-sky-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-sky-300/30">SMP N 2 Jengan Danum</span>
+                    </div>
+                    <h2 class="text-3xl font-extrabold mb-2 leading-tight">Media Pembelajaran Interaktif</h2>
+                    <p class="text-sky-100 text-sm opacity-90">Menguasai Teks Artikel Ilmiah Populer & Penggunaan Istilah Asing.</p>
+                </div>
+                
+                <div class="z-10 mt-6 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
+                    <div class="flex items-center space-x-3 mb-2">
+                        <!-- Foto Avatar Pengembang -->
+                        <div class="w-14 h-14 rounded-full border-2 border-sky-300 bg-amber-100 flex items-center justify-center overflow-hidden shadow-md shrink-0">
+                            <svg class="w-full h-full text-amber-800" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50" fill="#fde68a"/>
+                                <path d="M30 40 Q50 10 70 40 Q80 70 75 90 Q50 95 25 90 Q20 70 30 40 Z" fill="#331800"/>
+                                <circle cx="50" cy="45" r="20" fill="#fcd34d"/>
+                                <ellipse cx="43" cy="42" rx="2.5" ry="3.5" fill="#1e293b"/>
+                                <ellipse cx="57" cy="42" rx="2.5" ry="3.5" fill="#1e293b"/>
+                                <path d="M45 53 Q50 58 55 53" stroke="#b45309" stroke-width="2" fill="none"/>
+                                <path d="M20 100 Q50 75 80 100 Z" fill="#b45309"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-white">Ibu Anjelina Ria, S.Pd.</h4>
+                            <p class="text-[11px] text-sky-200">Guru Bahasa Indonesia</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-sky-100 italic">"Halo anak-anak hebat! Semangat berpetualang dan temukan keajaiban bahasa dalam ilmu pengetahuan!"</p>
+                </div>
+            </div>
+
+            <div class="md:w-7/12 p-8 flex flex-col justify-center bg-slate-50">
+                <h3 class="text-2xl font-bold text-slate-800 mb-2">Masuk ke Pembelajaran</h3>
+                <p class="text-slate-500 text-sm mb-6">Silakan isi data diri kamu sebelum memulai keseruannya!</p>
+                
+                <form id="welcomeForm" onsubmit="saveUserInfo(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Lengkap Siswa</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-4 top-3.5 text-slate-400"></i>
+                            <input type="text" id="inputName" required placeholder="Masukkan nama lengkapmu..." class="w-full pl-11 pr-4 py-3 bg-white rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-800 font-medium text-sm transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Asal Sekolah</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-school absolute left-4 top-3.5 text-slate-400"></i>
+                            <input type="text" id="inputSchool" required value="SMP NEGERI 2 JENGAN DANUM" placeholder="Nama sekolah..." class="w-full pl-11 pr-4 py-3 bg-white rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-800 font-medium text-sm transition">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="ifp-btn w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 flex items-center justify-center space-x-2 text-base transition">
+                        <span>Mulai Petualangan Belajar</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- APP CONTENT AREA (HIDDEN UNTIL LOGIN) -->
+        <div id="appContent" class="hidden w-full max-w-6xl flex flex-col lg:flex-row gap-6">
+
+            <!-- SIDEBAR NAVIGATION (PERFECT FOR IFP TOUCH) -->
+            <aside class="lg:w-1/4 bg-slate-800 rounded-3xl p-4 shadow-xl border border-slate-700 flex flex-col justify-between">
+                <div>
+                    <div class="px-3 py-2 mb-4 bg-slate-700/50 rounded-2xl border border-slate-600">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Menu Utama</span>
+                        <span class="text-sm font-bold text-white block truncate" id="menuStudentName">Siswa</span>
+                    </div>
+
+                    <nav class="space-y-2">
+                        <button onclick="switchTab('tujuan')" id="nav-tujuan" class="nav-btn w-full text-left px-4 py-3.5 rounded-2xl flex items-center space-x-3 text-sm font-semibold transition text-slate-300 hover:bg-slate-700">
+                            <i class="fa-solid fa-bullseye text-amber-400 w-6 text-center text-lg"></i>
+                            <span>Tujuan & Panduan</span>
+                        </button>
+
+                        <button onclick="switchTab('materi')" id="nav-materi" class="nav-btn w-full text-left px-4 py-3.5 rounded-2xl flex items-center space-x-3 text-sm font-semibold transition text-slate-300 hover:bg-slate-700">
+                            <i class="fa-solid fa-book-bookmark text-sky-400 w-6 text-center text-lg"></i>
+                            <span>Rangkuman Materi</span>
+                        </button>
+
+                        <button onclick="switchTab('simulasi')" id="nav-simulasi" class="nav-btn w-full text-left px-4 py-3.5 rounded-2xl flex items-center space-x-3 text-sm font-semibold transition text-slate-300 hover:bg-slate-700">
+                            <i class="fa-solid fa-masks-theater text-indigo-400 w-6 text-center text-lg"></i>
+                            <span>Simulasi & Cerita Siswa</span>
+                        </button>
+
+                        <button onclick="switchTab('petualangan')" id="nav-petualangan" class="nav-btn w-full text-left px-4 py-3.5 rounded-2xl flex items-center space-x-3 text-sm font-semibold transition text-slate-300 hover:bg-slate-700">
+                            <i class="fa-solid fa-gamepad text-emerald-400 w-6 text-center text-lg"></i>
+                            <div class="flex-1 flex justify-between items-center">
+                                <span>Ayo Berpetualang</span>
+                                <span id="adventureProgressBadge" class="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">0%</span>
+                            </div>
+                        </button>
+
+                        <button onclick="switchTab('asesmen')" id="nav-asesmen" class="nav-btn w-full text-left px-4 py-3.5 rounded-2xl flex items-center space-x-3 text-sm font-semibold transition text-slate-300 hover:bg-slate-700">
+                            <i class="fa-solid fa-list-check text-purple-400 w-6 text-center text-lg"></i>
+                            <span>Asesmen Sumatif</span>
+                        </button>
+
+                        <button onclick="switchTab('hots')" id="nav-hots" class="nav-btn w-full text-left px-4 py-3.5 rounded-2xl flex items-center space-x-3 text-sm font-semibold transition text-slate-300 hover:bg-slate-700">
+                            <i class="fa-solid fa-brain text-rose-400 w-6 text-center text-lg"></i>
+                            <span>Tantangan HOTS</span>
+                        </button>
+
+                        <button onclick="switchTab('refleksi')" id="nav-refleksi" class="nav-btn w-full text-left px-4 py-3.5 rounded-2xl flex items-center space-x-3 text-sm font-semibold transition text-slate-300 hover:bg-slate-700">
+                            <i class="fa-solid fa-heart text-pink-400 w-6 text-center text-lg"></i>
+                            <span>Refleksi</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="pt-4 border-t border-slate-700 mt-4">
+                    <button onclick="switchTab('pengembang')" id="nav-pengembang" class="nav-btn w-full text-left px-4 py-3 rounded-2xl flex items-center space-x-3 text-xs font-semibold transition text-slate-400 hover:bg-slate-700 hover:text-white">
+                        <i class="fa-solid fa-id-card text-slate-400 w-6 text-center"></i>
+                        <span>Pengembang & Referensi</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- TAB CONTENT AREA -->
+            <section class="lg:w-3/4 bg-white rounded-3xl p-6 md:p-8 shadow-2xl border border-slate-100 min-h-[600px] flex flex-col justify-between overflow-hidden relative">
+
+                <!-- TAB 1: TUJUAN & PANDUAN -->
+                <div id="tab-tujuan" class="tab-pane space-y-6">
+                    <div class="border-b border-slate-200 pb-4">
+                        <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Modul Pembelajaran</span>
+                        <h2 class="text-3xl font-extrabold text-slate-800 mt-2">Tujuan Pembelajaran & Panduan</h2>
+                    </div>
+
+                    <div class="grid grid-md-2 gap-6">
+                        <div class="bg-amber-50/70 border border-amber-200 p-6 rounded-2xl">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="bg-amber-500 text-white p-2 rounded-xl">
+                                    <i class="fa-solid fa-bullseye text-xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800">Tujuan Pembelajaran</h3>
+                            </div>
+                            <p class="text-slate-700 text-base leading-relaxed">
+                                Peserta didik mampu <span class="font-bold text-amber-900 bg-amber-200/60 px-1 rounded">menganalisis teks artikel ilmiah populer</span> khusus pada aspek <span class="font-bold text-amber-900 bg-amber-200/60 px-1 rounded">penggunaan istilah asing</span>, memahami artinya secara tepat berdasarkan kontekstualnya, serta menentukan padanan kata dalam Bahasa Indonesia secara akurat.
+                            </p>
+                        </div>
+
+                        <div class="bg-sky-50/70 border border-sky-200 p-6 rounded-2xl">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="bg-sky-500 text-white p-2 rounded-xl">
+                                    <i class="fa-solid fa-hand-pointer text-xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800">Panduan Penggunaan IFP</h3>
+                            </div>
+                            <ul class="space-y-3 text-slate-700 text-sm">
+                                <li class="flex items-start space-x-2">
+                                    <i class="fa-solid fa-check-circle text-sky-500 mt-1"></i>
+                                    <span>Gunakan sentuhan jari atau <i>stylus pen</i> pada Papan Interaktif (IFP) untuk memilih menu.</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <i class="fa-solid fa-check-circle text-sky-500 mt-1"></i>
+                                    <span>Buka menu <b>Rangkuman Materi</b> untuk mempelajari penulisan istilah asing.</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <i class="fa-solid fa-check-circle text-sky-500 mt-1"></i>
+                                    <span>Selesaikan seluruh level di <b>Ayo Berpetualang</b> secara berurutan untuk membuka tantangan berikutnya.</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <i class="fa-solid fa-check-circle text-sky-500 mt-1"></i>
+                                    <span>Kerjakan <b>Tantangan HOTS</b> dan isi <b>Refleksi Pembelajaran</b> di akhir sesi.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-200 p-5 rounded-2xl flex items-center space-x-4">
+                        <i class="fa-solid fa-lightbulb text-3xl text-emerald-600"></i>
+                        <p class="text-xs text-emerald-900">
+                            <b>Tips Pembelajaran Interaktif:</b> Klik kata yang bercetak miring (<i>italic</i>) pada contoh artikel untuk menampilkan padanan bahasa Indonesianya secara langsung!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TAB 2: RANGKUMAN MATERI -->
+                <div id="tab-materi" class="tab-pane hidden space-y-6">
+                    <div class="border-b border-slate-200 pb-4 flex justify-between items-end">
+                        <div>
+                            <span class="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Materi Pembelajaran</span>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mt-2">Istilah Asing dalam Artikel Ilmiah</h2>
+                        </div>
+                    </div>
+
+                    <!-- Penjelasan Aturan Ejaan & Padanan Kata -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-sky-50/70 border border-sky-200 p-5 rounded-2xl space-y-3">
+                            <h3 class="font-bold text-sky-900 text-base flex items-center">
+                                <i class="fa-solid fa-pen-nib text-sky-600 mr-2"></i> Aturan Penulisan Istilah Asing (EYD V)
+                            </h3>
+                            <ul class="space-y-2 text-xs text-slate-700 leading-relaxed">
+                                <li class="flex items-start space-x-2">
+                                    <i class="fa-solid fa-check text-sky-500 mt-0.5"></i>
+                                    <span><b>Cetak Miring (Italic):</b> Istilah bahasa asing yang belum diserap secara resmi dalam Bahasa Indonesia wajib ditulis miring (contoh: <i>download</i>, <i>gawai</i>).</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <i class="fa-solid fa-check text-sky-500 mt-0.5"></i>
+                                    <span><b>Penyerapan Baku:</b> Jika kata asing sudah diserap resmi ke KBBI, maka penulisannya tegak sesuai ejaan Indonesia (contoh: <i>computer</i> &rarr; komputer).</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <i class="fa-solid fa-check text-sky-500 mt-0.5"></i>
+                                    <span><b>Penggunaan Padanan:</b> Utamakan penggunaan padanan Bahasa Indonesia agar teks ilmiah populer lebih mudah dipahami publik.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-emerald-50/70 border border-emerald-200 p-5 rounded-2xl space-y-3">
+                            <h3 class="font-bold text-emerald-900 text-base flex items-center">
+                                <i class="fa-solid fa-language text-emerald-600 mr-2"></i> Contoh Padanan Kata Populer
+                            </h3>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-white p-2.5 rounded-xl border border-emerald-100">
+                                    <span class="text-slate-400 block text-[10px]">Istilah Asing</span>
+                                    <span class="font-bold text-slate-800">Online / Offline</span>
+                                    <span class="text-emerald-600 font-semibold block mt-0.5">&rarr; Daring / Luring</span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-xl border border-emerald-100">
+                                    <span class="text-slate-400 block text-[10px]">Istilah Asing</span>
+                                    <span class="font-bold text-slate-800">Upload / Download</span>
+                                    <span class="text-emerald-600 font-semibold block mt-0.5">&rarr; Unggah / Unduh</span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-xl border border-emerald-100">
+                                    <span class="text-slate-400 block text-[10px]">Istilah Asing</span>
+                                    <span class="font-bold text-slate-800">Gadget / Link</span>
+                                    <span class="text-emerald-600 font-semibold block mt-0.5">&rarr; Gawai / Tautan</span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-xl border border-emerald-100">
+                                    <span class="text-slate-400 block text-[10px]">Istilah Asing</span>
+                                    <span class="font-bold text-slate-800">Scan / Deadline</span>
+                                    <span class="text-emerald-600 font-semibold block mt-0.5">&rarr; Pindai / Tenggat</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Artikel Ilmiah Populer Interaktif (Bisa Diklik) -->
+                    <div class="bg-white border-2 border-slate-200 p-6 rounded-2xl shadow-sm space-y-4">
+                        <div class="flex justify-between items-center border-b pb-3">
+                            <div>
+                                <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-0.5 rounded uppercase">Teks Artikel Interaktif</span>
+                                <h3 class="font-extrabold text-slate-800 text-lg mt-1">Dampak Pembelajaran Digital pada Remaja</h3>
+                            </div>
+                            <span class="text-xs text-slate-400 italic">Sentuh istilah miring untuk melihat arti!</span>
+                        </div>
+
+                        <p class="text-slate-700 text-sm leading-relaxed">
+                            Perkembangan teknologi telah mengubah pola belajar siswa SMP. Banyak sekolah kini menerapkan sistem pembelajaran secara 
+                            <button onclick="showTermInfo('Online', 'Daring (Dalam Jaringan)', 'Pembelajaran yang terhubung melalui jaringan internet.')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-1.5 py-0.5 rounded italic underline decoration-dotted transition">
+                                online
+                            </button> 
+                            menggunakan perangkat 
+                            <button onclick="showTermInfo('Gadget', 'Gawai', 'Perangkat elektronik kecil seperti smartphone atau tablet.')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-1.5 py-0.5 rounded italic underline decoration-dotted transition">
+                                gadget
+                            </button>. 
+                            Siswa dapat melakukan 
+                            <button onclick="showTermInfo('Download', 'Unduh', 'Proses mengambil berkas/data dari server ke perangkat lokal.')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-1.5 py-0.5 rounded italic underline decoration-dotted transition">
+                                download
+                            </button> 
+                            materi pelajaran dalam bentuk e-book serta melakukan 
+                            <button onclick="showTermInfo('Upload', 'Unggah', 'Proses mengirimkan berkas dari perangkat lokal ke internet/server.')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-1.5 py-0.5 rounded italic underline decoration-dotted transition">
+                                upload
+                            </button> 
+                            tugas sebelum 
+                            <button onclick="showTermInfo('Deadline', 'Tenggat / Batas Waktu', 'Batas akhir penyerahan atau penyelesaian suatu pekerjaan.')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-1.5 py-0.5 rounded italic underline decoration-dotted transition">
+                                deadline
+                            </button> 
+                            yang ditentukan guru.
+                        </p>
+
+                        <!-- Pop-up penjelasan istilah yang diklik -->
+                        <div id="termInfoBox" class="hidden bg-slate-800 text-white p-4 rounded-xl shadow-lg border border-slate-700 animate-fade-in">
+                            <div class="flex justify-between items-center mb-1">
+                                <span id="termOriginal" class="font-extrabold text-amber-400 text-sm">Istilah</span>
+                                <span id="termIndo" class="bg-emerald-500/30 text-emerald-300 text-xs px-2 py-0.5 rounded font-bold">Padanan</span>
+                            </div>
+                            <p id="termDesc" class="text-xs text-slate-300">Penjelasan istilah akan muncul di sini.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB BARU: SIMULASI & CERITA SISWA -->
+                <div id="tab-simulasi" class="tab-pane hidden space-y-6">
+                    <div class="border-b border-slate-200 pb-4 flex justify-between items-center">
+                        <div>
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Visual & Simulasi Interaktif</span>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mt-1">Simulasi & Percakapan Siswa</h2>
+                        </div>
+                    </div>
+
+                    <!-- Mode Toggle: Cerita vs Drag-Drop -->
+                    <div class="flex space-x-3 bg-slate-100 p-1.5 rounded-2xl w-fit">
+                        <button onclick="toggleSimMode('story')" id="simTabStoryBtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-indigo-600 shadow-sm transition">
+                            <i class="fa-solid fa-comments mr-1.5"></i> Percakapan Siswa (Komik)
+                        </button>
+                        <button onclick="toggleSimMode('drag')" id="simTabDragBtn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                            <i class="fa-solid fa-hand-pointer mr-1.5"></i> Simulasi Pencocokan Kata
+                        </button>
+                    </div>
+
+                    <!-- SUB-SECTION 1: PERCAKAPAN SISWA (KOMIK INTERAKTIF) -->
+                    <div id="simStorySection" class="space-y-4">
+                        <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-5 rounded-2xl shadow-md flex justify-between items-center">
+                            <div>
+                                <span class="text-xs text-indigo-300 font-bold uppercase tracking-wider block">Studi Kasus Visual</span>
+                                <h4 class="font-extrabold text-lg">Diskusi Mading Sekolah: Budi & Ani</h4>
+                            </div>
+                            <span id="storyStepBadge" class="bg-indigo-500/40 text-indigo-200 text-xs px-3 py-1 rounded-full font-bold">Langkah 1 dari 4</span>
+                        </div>
+
+                        <!-- Dialogue Stage Area -->
+                        <div class="bg-indigo-50/50 border border-indigo-100 rounded-3xl p-6 min-h-[320px] flex flex-col justify-between relative overflow-hidden">
+                            <!-- Character Avatars Container -->
+                            <div class="flex justify-between items-end mb-4 px-4">
+                                <!-- Budi -->
+                                <div id="charBudi" class="flex flex-col items-center transition-all duration-300">
+                                    <div class="w-16 h-16 rounded-full bg-blue-500 border-4 border-white shadow-md flex items-center justify-center text-white text-2xl font-bold mb-1">
+                                        👦
+                                    </div>
+                                    <span class="text-xs font-extrabold text-slate-700 bg-white px-2 py-0.5 rounded-full shadow-sm">Budi</span>
+                                </div>
+                                
+                                <!-- Center Illustrative Icon -->
+                                <div class="hidden md:flex flex-col items-center opacity-30">
+                                    <i class="fa-solid fa-newspaper text-5xl text-indigo-400"></i>
+                                    <span class="text-[10px] text-slate-500 font-bold mt-1">Dilema Artikel Mading</span>
+                                </div>
+
+                                <!-- Ani -->
+                                <div id="charAni" class="flex flex-col items-center transition-all duration-300">
+                                    <div class="w-16 h-16 rounded-full bg-pink-500 border-4 border-white shadow-md flex items-center justify-center text-white text-2xl font-bold mb-1">
+                                        👧
+                                    </div>
+                                    <span class="text-xs font-extrabold text-slate-700 bg-white px-2 py-0.5 rounded-full shadow-sm">Ani</span>
+                                </div>
+                            </div>
+
+                            <!-- Speech Bubble Box -->
+                            <div class="bg-white p-5 rounded-2xl border-2 border-indigo-200 shadow-lg relative z-10 space-y-2">
+                                <div class="flex justify-between items-center border-b pb-2">
+                                    <span id="speechSpeaker" class="font-extrabold text-indigo-600 text-sm">Budi</span>
+                                    <i class="fa-solid fa-quote-right text-indigo-200 text-xl"></i>
+                                </div>
+                                <p id="speechText" class="text-slate-800 font-medium text-sm leading-relaxed">
+                                     Loading percakapan...
+                                </p>
+                            </div>
+
+                            <!-- Interactivity / Choice inside Story -->
+                            <div id="storyChoiceBox" class="hidden mt-3 bg-white p-4 rounded-2xl border border-indigo-300 shadow-md">
+                                <p id="storyQuestionText" class="text-xs font-bold text-slate-800 mb-2">Bantu Budi & Ani mengambil keputusan:</p>
+                                <div id="storyChoicesContainer" class="grid grid-cols-2 gap-2">
+                                    <!-- Dynamic Choices -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Story Controls -->
+                        <div class="flex justify-between items-center pt-2">
+                            <button onclick="prevStoryStep()" id="btnPrevStory" disabled class="ifp-btn bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs disabled:opacity-40">
+                                <i class="fa-solid fa-arrow-left mr-1"></i> Sebelumnya
+                            </button>
+                            <button onclick="nextStoryStep()" id="btnNextStory" class="ifp-btn bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md">
+                                Lanjut Bicara <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECTION 2: SIMULASI PENCOCOKAN KATA (INTERAKTIF IFP) -->
+                    <div id="simDragSection" class="hidden space-y-4">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">Simulasi Pasangan Kata Asing & Padanan Indonesia</h4>
+                                <p class="text-xs text-slate-500">Sentuh/klik istilah asing lalu sentuh padanan kata yang sesuai!</p>
+                            </div>
+                            <button onclick="resetMatchSim()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-rotate-right mr-1"></i> Reset Simulasi
+                            </button>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Kolom 1: Istilah Asing -->
+                            <div class="bg-blue-50/70 border border-blue-200 p-4 rounded-2xl space-y-3">
+                                <h5 class="text-xs font-extrabold text-blue-900 uppercase tracking-wider text-center">Istilah Asing (Klik/Sentuh)</h5>
+                                <div id="foreignTermsContainer" class="space-y-2">
+                                    <!-- Dynamic Buttons -->
+                                </div>
+                            </div>
+
+                            <!-- Kolom 2: Padanan Indonesia -->
+                            <div class="bg-emerald-50/70 border border-emerald-200 p-4 rounded-2xl space-y-3">
+                                <h5 class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider text-center">Padanan Indonesia (Target)</h5>
+                                <div id="indoTermsContainer" class="space-y-2">
+                                    <!-- Dynamic Target Slots -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Match Result Feedback -->
+                        <div id="matchFeedback" class="hidden p-4 rounded-xl text-xs font-semibold text-center"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: AYO BERPETUALANG (3 LEVEL X 3 TANTANGAN) -->
+                <div id="tab-petualangan" class="tab-pane hidden space-y-6">
+                    <div class="border-b border-slate-200 pb-4 flex justify-between items-center">
+                        <div>
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Mini Game Interaktif</span>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mt-1">Ayo Berpetualang!</h2>
+                        </div>
+                        <!-- Overall Progress Bar -->
+                        <div class="w-48 bg-slate-200 rounded-full h-4 overflow-hidden border border-slate-300">
+                            <div id="overallProgressBar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                    </div>
+
+                    <!-- Level Selector Cards -->
+                    <div id="levelSelector" class="grid md:grid-cols-3 gap-6">
+                        <!-- Level 1 Card -->
+                        <div id="card-level-1" class="border-2 border-emerald-500 bg-emerald-50/40 p-5 rounded-2xl flex flex-col justify-between shadow-sm relative">
+                            <div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="bg-emerald-500 text-white font-bold text-xs px-3 py-1 rounded-full">LEVEL 1</span>
+                                    <span id="badge-lvl1" class="text-xs font-bold text-emerald-700">0/3 Selesai</span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-lg">Detektif Kata</h4>
+                                <p class="text-xs text-slate-600 mt-1">Menentukan padanan tepat istilah asing populer.</p>
+                            </div>
+                            <button onclick="startLevel(1)" class="ifp-btn mt-6 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow">
+                                Mainkan Level 1
+                            </button>
+                        </div>
+
+                        <!-- Level 2 Card -->
+                        <div id="card-level-2" class="border-2 border-slate-300 bg-slate-100 opacity-60 p-5 rounded-2xl flex flex-col justify-between relative">
+                            <div class="absolute inset-0 bg-slate-900/10 rounded-2xl flex items-center justify-center backdrop-blur-[1px] z-10" id="lock-lvl2">
+                                <div class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-2">
+                                    <i class="fa-solid fa-lock text-amber-400"></i>
+                                    <span>Selesaikan Level 1 Dahulu</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="bg-sky-500 text-white font-bold text-xs px-3 py-1 rounded-full">LEVEL 2</span>
+                                    <span id="badge-lvl2" class="text-xs font-bold text-sky-700">0/3 Selesai</span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-lg">Penyunting Artikel</h4>
+                                <p class="text-xs text-slate-600 mt-1">Mengoreksi format penulisan serapan asing.</p>
+                            </div>
+                            <button onclick="startLevel(2)" id="btn-lvl2" disabled class="ifp-btn mt-6 w-full bg-sky-600 text-white font-bold py-3 rounded-xl">
+                                Mainkan Level 2
+                            </button>
+                        </div>
+
+                        <!-- Level 3 Card -->
+                        <div id="card-level-3" class="border-2 border-slate-300 bg-slate-100 opacity-60 p-5 rounded-2xl flex flex-col justify-between relative">
+                            <div class="absolute inset-0 bg-slate-900/10 rounded-2xl flex items-center justify-center backdrop-blur-[1px] z-10" id="lock-lvl3">
+                                <div class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-2">
+                                    <i class="fa-solid fa-lock text-amber-400"></i>
+                                    <span>Selesaikan Level 2 Dahulu</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="bg-purple-500 text-white font-bold text-xs px-3 py-1 rounded-full">LEVEL 3</span>
+                                    <span id="badge-lvl3" class="text-xs font-bold text-purple-700">0/3 Selesai</span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-lg">Pakar Konteks</h4>
+                                <p class="text-xs text-slate-600 mt-1">Menganalisis pergeseran makna istilah ilmiah.</p>
+                            </div>
+                            <button onclick="startLevel(3)" id="btn-lvl3" disabled class="ifp-btn mt-6 w-full bg-purple-600 text-white font-bold py-3 rounded-xl">
+                                Mainkan Level 3
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Game Gameplay Area (Hidden by Default) -->
+                    <div id="gamePlayArea" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-6">
+                        <div class="flex justify-between items-center border-b pb-4 mb-4">
+                            <div class="flex items-center space-x-3">
+                                <button onclick="backToLevelSelect()" class="text-xs font-bold bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg text-slate-700">
+                                    <i class="fa-solid fa-arrow-left"></i> Kembali
+                                </button>
+                                <span id="gameCurrentTitle" class="font-bold text-slate-800 text-sm">Level 1 - Tantangan</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-semibold text-slate-500">Tingkat Kesulitan:</span>
+                                <span id="difficultyBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-green-100 text-green-700">MUDAH</span>
+                            </div>
+                        </div>
+
+                        <!-- Game Challenge Content -->
+                        <div class="space-y-4">
+                            <div class="bg-white p-5 rounded-xl border border-slate-200">
+                                <p id="gameQuestionText" class="text-slate-800 font-semibold text-base">Soal Tantangan...</p>
+                            </div>
+
+                            <div id="gameOptionsContainer" class="grid md:grid-cols-2 gap-3">
+                                <!-- Options dynamically rendered -->
+                            </div>
+                        </div>
+
+                        <!-- Game Feedback Box -->
+                        <div id="gameFeedback" class="hidden mt-4 p-4 rounded-xl text-xs font-semibold"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: ASESMEN SUMATIF -->
+                <div id="tab-asesmen" class="tab-pane hidden space-y-6">
+                    <div class="border-b border-slate-200 pb-4">
+                        <span class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Praktik & Proyek</span>
+                        <h2 class="text-3xl font-extrabold text-slate-800 mt-1">Asesmen Sumatif Proyek</h2>
+                    </div>
+
+                    <div class="bg-purple-50/50 border border-purple-200 p-6 rounded-2xl space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-purple-600 text-white p-3 rounded-xl">
+                                <i class="fa-solid fa-list-check text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-900">Tugas Proyek: "Detektif Bahasa di Media Digital"</h3>
+                                <p class="text-xs text-slate-500">Durasi Pengerjaan: Kelompok (3-4 Siswa)</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-purple-100 space-y-3 text-sm text-slate-700">
+                            <h4 class="font-bold text-slate-900 border-b pb-2">Instruksi Langkah Kerja Proyek:</h4>
+                            <ol class="list-decimal pl-5 space-y-2">
+                                <li>Cari <b>satu artikel ilmiah populer</b> dari koran digital atau majalah pendidikan.</li>
+                                <li>Temukan minimal <b>5 istilah asing</b> yang terdapat di dalam artikel tersebut.</li>
+                                <li>Buatlah <b>Tabel Analisis Istilah Asing</b> di buku tugas/kertas manila dengan format berikut:
+                                    <ul class="list-disc pl-5 mt-1 text-xs text-slate-600 space-y-1">
+                                        <li>Istilah Asing yang ditemukan</li>
+                                        <li>Penulisan baku sesuai EYD/PUEBI (apakah miring?)</li>
+                                        <li>Padanan kata dalam Bahasa Indonesia</li>
+                                        <li>Makna istilah sesuai konteks kalimat artikel</li>
+                                    </ul>
+                                </li>
+                                <li>Presentasikan hasil temuan kelompokmu di depan kelas menggunakan IFP!</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: TANTANGAN HOTS -->
+                <div id="tab-hots" class="tab-pane hidden space-y-6">
+                    <div class="border-b border-slate-200 pb-4 flex justify-between items-center">
+                        <div>
+                            <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Evaluasi Kognitif</span>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mt-1">Tantangan Soal HOTS</h2>
+                        </div>
+                        <span id="hotsScoreBadge" class="bg-rose-50 border border-rose-200 text-rose-700 font-bold text-sm px-4 py-1.5 rounded-full">
+                            Skor: <span id="hotsScore">0</span> / 100
+                        </span>
+                    </div>
+
+                    <div id="hotsQuizArea" class="space-y-4">
+                        <!-- HOTS Story Context -->
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                            <span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Studi Kasus Cerita</span>
+                            <p id="hotsStoryText" class="text-slate-700 text-sm mt-2 leading-relaxed italic">
+                                Loading cerita...
+                            </p>
+                        </div>
+
+                        <!-- Question & Choices -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                            <h4 id="hotsQuestionText" class="font-bold text-slate-800 text-base">Pertanyaan...</h4>
+
+                            <div id="hotsChoicesContainer" class="space-y-2">
+                                <!-- Choices rendered via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Navigation & Feedback -->
+                        <div id="hotsFeedback" class="hidden p-4 rounded-xl text-xs font-semibold"></div>
+
+                        <div class="flex justify-between items-center pt-2">
+                            <span id="hotsCounter" class="text-xs font-bold text-slate-400">Soal 1 dari 3</span>
+                            <button id="btnNextHots" onclick="nextHotsQuestion()" disabled class="ifp-btn bg-slate-800 hover:bg-slate-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs disabled:opacity-50">
+                                Soal Berikutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 6: REFLEKSI PEMBELAJARAN -->
+                <div id="tab-refleksi" class="tab-pane hidden space-y-6">
+                    <div class="border-b border-slate-200 pb-4">
+                        <span class="bg-pink-100 text-pink-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Evaluasi Diri</span>
+                        <h2 class="text-3xl font-extrabold text-slate-800 mt-1">Refleksi Pembelajaran</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-pink-50/50 p-6 rounded-2xl border border-pink-200">
+                            <h3 class="font-bold text-slate-800 text-base mb-3">Bagaimana perasaanmu setelah mempelajari materi ini?</h3>
+                            <div class="flex justify-around items-center">
+                                <button onclick="selectEmoji(this, 'Sangat Senang')" class="emoji-btn flex flex-col items-center p-3 rounded-2xl hover:bg-white transition border border-transparent hover:border-pink-300">
+                                    <span class="text-4xl mb-1">😍</span>
+                                    <span class="text-xs font-bold text-slate-700">Sangat Paham</span>
+                                </button>
+                                <button onclick="selectEmoji(this, 'Senang')" class="emoji-btn flex flex-col items-center p-3 rounded-2xl hover:bg-white transition border border-transparent hover:border-pink-300">
+                                    <span class="text-4xl mb-1">😊</span>
+                                    <span class="text-xs font-bold text-slate-700">Cukup Paham</span>
+                                </button>
+                                <button onclick="selectEmoji(this, 'Bingung')" class="emoji-btn flex flex-col items-center p-3 rounded-2xl hover:bg-white transition border border-transparent hover:border-pink-300">
+                                    <span class="text-4xl mb-1">🤔</span>
+                                    <span class="text-xs font-bold text-slate-700">Perlu Belajar Lagi</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase">Apa hal terpenting yang kamu pelajari hari ini?</label>
+                            <textarea id="reflectionNotes" rows="4" placeholder="Tuliskan pengalaman atau hal baru yang kamu dapatkan di sini..." class="w-full p-4 bg-slate-50 border border-slate-300 rounded-2xl text-xs text-slate-800 outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition"></textarea>
+                        </div>
+
+                        <button onclick="saveReflection()" class="ifp-btn w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-xl shadow">
+                            Simpan Refleksi Saya
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 7: PENGEMBANG & REFERENSI -->
+                <div id="tab-pengembang" class="tab-pane hidden space-y-6">
+                    <div class="border-b border-slate-200 pb-4">
+                        <span class="bg-slate-200 text-slate-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Identitas & Sumber</span>
+                        <h2 class="text-3xl font-extrabold text-slate-800 mt-1">Pengembang & Referensi</h2>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Profil Pengembang -->
+                        <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl text-center flex flex-col items-center justify-center relative overflow-hidden">
+                            <div class="flex items-center justify-center space-x-3 mb-4">
+                                <svg class="w-10 h-10 drop-shadow-sm" viewBox="0 0 500 500" fill="none">
+                                    <path d="M250 20 L440 70 V240 C440 350 350 440 250 480 C150 440 60 350 60 240 V70 Z" fill="#2563EB" stroke="#00FF00" stroke-width="12"/>
+                                    <path d="M250 60 L262 98 L302 98 L270 121 L282 159 L250 136 L218 159 L230 121 L198 98 L238 98 Z" fill="#F59E0B"/>
+                                    <path d="M100 130 Q250 170 400 130 V165 Q250 205 100 165 Z" fill="#FFFFFF"/>
+                                    <path d="M250 340 Q300 290 370 300 V250 Q300 240 250 290 Q200 240 130 250 V300 Q200 290 250 340 Z" fill="#DBEAFE"/>
+                                    <path d="M250 180 C230 210 230 240 250 260 C270 240 270 210 250 180 Z" fill="#EF4444"/>
+                                </svg>
+                                <span class="text-xs font-bold text-slate-700 uppercase tracking-widest">SMP N 2 Jengan Danum</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <div class="w-32 h-32 rounded-full border-4 border-white shadow-xl bg-amber-100 flex items-center justify-center overflow-hidden">
+                                    <svg class="w-full h-full text-amber-800" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="50" fill="#fde68a"/>
+                                        <path d="M30 40 Q50 10 70 40 Q80 70 75 90 Q50 95 25 90 Q20 70 30 40 Z" fill="#331800"/>
+                                        <circle cx="50" cy="45" r="20" fill="#fcd34d"/>
+                                        <ellipse cx="43" cy="42" rx="2.5" ry="3.5" fill="#1e293b"/>
+                                        <ellipse cx="57" cy="42" rx="2.5" ry="3.5" fill="#1e293b"/>
+                                        <path d="M45 53 Q50 58 55 53" stroke="#b45309" stroke-width="2" fill="none"/>
+                                        <path d="M20 100 Q50 75 80 100 Z" fill="#b45309"/>
+                                    </svg>
+                                </div>
+                                <span class="absolute bottom-1 right-1 bg-emerald-500 text-white p-1.5 rounded-full text-xs shadow"><i class="fa-solid fa-check"></i></span>
+                            </div>
+                            <h3 class="font-extrabold text-slate-900 text-xl">Anjelina Ria, S.Pd.</h3>
+                            <p class="text-xs font-bold text-blue-600 mt-1">Pengembang Multimedia Pembelajaran</p>
+                            
+                            <div class="mt-4 bg-white px-4 py-3 rounded-xl border border-slate-200 w-full text-xs text-slate-600 space-y-1">
+                                <p><b>Unit Kerja:</b> SMP NEGERI 2 JENGAN DANUM</p>
+                                <p><b>Kabupaten:</b> Kutai Barat</p>
+                                <p><b>Mata Pelajaran:</b> Bahasa Indonesia</p>
+                            </div>
+                        </div>
+
+                        <!-- Referensi Materi -->
+                        <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-base mb-3 flex items-center">
+                                    <i class="fa-solid fa-bookmark text-blue-600 mr-2"></i> Referensi & Acuan Utuk MPI
+                                </h4>
+                                <ul class="space-y-2 text-xs text-slate-600">
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fa-solid fa-angle-right text-blue-500 mt-0.5"></i>
+                                        <span>Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi. (2021). <i>Buku Panduan Guru Bahasa Indonesia SMP Kelas VIII</i>. Jakarta.</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fa-solid fa-angle-right text-blue-500 mt-0.5"></i>
+                                        <span>Pedoman Umum Ejaan Bahasa Indonesia (PUEBI) & EYD Edisi V.</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fa-solid fa-angle-right text-blue-500 mt-0.5"></i>
+                                        <span>Badan Pengembangan dan Pembinaan Bahasa. <i>Kamus Besar Bahasa Indonesia (KBBI) VI Online</i>.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-4 border-t pt-2">Dirancang khusus untuk dioperasikan pada Interactive Flat Panel (IFP) sekolah.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer note inside content card -->
+                <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-[11px] text-slate-400">
+                    <span>MPI Bahasa Indonesia SMP - Kelas VIII</span>
+                    <span>SMP NEGERI 2 JENGAN DANUM</span>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal Notification Alert (Custom IFP friendly alert) -->
+    <div id="customModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-100 transform transition-all">
+            <div id="modalIcon" class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Pemberitahuan</h3>
+            <p id="modalMessage" class="text-xs text-slate-600 mt-2 mb-6">Pesan pemberitahuan di sini.</p>
+            <button onclick="closeModal()" class="ifp-btn w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl text-xs">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- GLOBAL STATE ---
+        let currentStudent = { name: '', school: '' };
+        let adventureProgress = {
+            level1: [false, false, false], // mudah, sedang, sulit
+            level2: [false, false, false],
+            level3: [false, false, false]
+        };
+        let currentLevel = 1;
+        let currentChallengeIndex = 0; // 0: mudah, 1: sedang, 2: sulit
+
+        // --- SIMULASI CERITA SISWA STATE ---
+        const storySteps = [
+            {
+                speaker: "Budi",
+                role: "charBudi",
+                text: "Ani, lihat deh draft artikel ilmiah mading kita! Aku tulis kalimat: 'Siswa harus melakukan *upload* tugas sebelum *deadline* agar tidak kena *penalty*.' Menurutmu sudah oke belum?",
+                hasChoice: false
+            },
+            {
+                speaker: "Ani",
+                role: "charAni",
+                text: "Wah Budi, topikmu menarik! Tapi kata Bu Ria, penggunaan istilah asing seperti *upload*, *deadline*, dan *penalty* sebaiknya diganti dengan padanan bahasa Indonesia yang baku.",
+                hasChoice: true,
+                question: "Pertanyaan: Apa padanan kata yang tepat untuk istilah 'deadline'?",
+                choices: [
+                    { text: "Batas Waktu", correct: true, exp: "Tepat sekali! 'Deadline' diserap baku menjadi 'Batas Waktu'." },
+                    { text: "Waktu Tidur", correct: false, exp: "Kurang tepat. 'Deadline' artinya batas akhir penyerahan tugas." }
+                ]
+            },
+            {
+                speaker: "Budi",
+                role: "charBudi",
+                text: "Oh iya! Jadi kalau diubah, kalimatnya menjadi: 'Siswa harus mengunggah tugas sebelum batas waktu agar tidak mendapat sanksi.' Wah, Bahasa Indonesia kita ternyata lengkap sekali ya!",
+                hasChoice: false
+            },
+            {
+                speaker: "Ani",
+                role: "charAni",
+                text: "Betul! Selain itu, kalaupun kita tetap harus memakai istilah asing teknis yang belum ada padanannya, penulisan di artikelnya wajib dicetak miring (italic). Jangan lupa ya!",
+                hasChoice: false
+            }
+        ];
+        let currentStoryStep = 0;
+
+        // --- SIMULASI PENCOCOKAN KATA STATE ---
+        const matchData = [
+            { id: 1, foreign: "Online", indo: "Daring (Dalam Jaringan)" },
+            { id: 2, foreign: "Offline", indo: "Luring (Luar Jaringan)" },
+            { id: 3, foreign: "Download", indo: "Unduh" },
+            { id: 4, foreign: "Upload", indo: "Unggah" },
+            { id: 5, foreign: "Link", indo: "Tautan" }
+        ];
+        let selectedForeignId = null;
+        let matchedIds = [];
+
+        function toggleSimMode(mode) {
+            const storySec = document.getElementById('simStorySection');
+            const dragSec = document.getElementById('simDragSection');
+            const btnStory = document.getElementById('simTabStoryBtn');
+            const btnDrag = document.getElementById('simTabDragBtn');
+
+            if (mode === 'story') {
+                storySec.classList.remove('hidden');
+                dragSec.classList.add('hidden');
+                btnStory.className = "px-4 py-2 rounded-xl text-xs font-bold bg-white text-indigo-600 shadow-sm transition";
+                btnDrag.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+            } else {
+                storySec.classList.add('hidden');
+                dragSec.classList.remove('hidden');
+                btnStory.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+                btnDrag.className = "px-4 py-2 rounded-xl text-xs font-bold bg-white text-indigo-600 shadow-sm transition";
+                initMatchSim();
+            }
+        }
+
+        function loadStoryStep(index) {
+            currentStoryStep = index;
+            const step = storySteps[index];
+
+            document.getElementById('storyStepBadge').innerText = `Langkah ${index + 1} dari ${storySteps.length}`;
+            document.getElementById('speechSpeaker').innerText = step.speaker;
+            document.getElementById('speechText').innerText = step.text;
+
+            // Character Highlighting
+            if (step.role === 'charBudi') {
+                document.getElementById('charBudi').classList.remove('opacity-40', 'scale-90');
+                document.getElementById('charBudi').classList.add('scale-110');
+                document.getElementById('charAni').classList.add('opacity-40', 'scale-90');
+            } else {
+                document.getElementById('charAni').classList.remove('opacity-40', 'scale-90');
+                document.getElementById('charAni').classList.add('scale-110');
+                document.getElementById('charBudi').classList.add('opacity-40', 'scale-90');
+            }
+
+            // Controls
+            document.getElementById('btnPrevStory').disabled = (index === 0);
+            const btnNext = document.getElementById('btnNextStory');
+            if (index === storySteps.length - 1) {
+                btnNext.innerHTML = `Selesai <i class="fa-solid fa-check ml-1"></i>`;
+            } else {
+                btnNext.innerHTML = `Lanjut Bicara <i class="fa-solid fa-arrow-right ml-1"></i>`;
+            }
+
+            // Interactive choice inside story
+            const choiceBox = document.getElementById('storyChoiceBox');
+            if (step.hasChoice) {
+                choiceBox.classList.remove('hidden');
+                document.getElementById('storyQuestionText').innerText = step.question;
+                const container = document.getElementById('storyChoicesContainer');
+                container.innerHTML = '';
+                step.choices.forEach((c) => {
+                    const btn = document.createElement('button');
+                    btn.className = "ifp-btn w-full p-2.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-xs font-bold text-indigo-900 transition";
+                    btn.innerText = c.text;
+                    btn.onclick = () => {
+                        showCustomModal(c.correct ? "Jawaban Benar!" : "Kurang Tepat", c.exp);
+                    };
+                    container.appendChild(btn);
+                });
+            } else {
+                choiceBox.classList.add('hidden');
+            }
+        }
+
+        function nextStoryStep() {
+            if (currentStoryStep < storySteps.length - 1) {
+                loadStoryStep(currentStoryStep + 1);
+            } else {
+                showCustomModal("Simulasi Cerita Selesai!", "Hebat! Kamu telah memahami pentingnya kesadaran istilah asing dari percakapan Budi dan Ani.");
+            }
+        }
+
+        function prevStoryStep() {
+            if (currentStoryStep > 0) {
+                loadStoryStep(currentStoryStep - 1);
+            }
+        }
+
+        // Match Simulation Logic
+        function initMatchSim() {
+            selectedForeignId = null;
+            matchedIds = [];
+            document.getElementById('matchFeedback').classList.add('hidden');
+
+            const foreignContainer = document.getElementById('foreignTermsContainer');
+            const indoContainer = document.getElementById('indoTermsContainer');
+            foreignContainer.innerHTML = '';
+            indoContainer.innerHTML = '';
+
+            // Shuffle Indo list for fun
+            const shuffledIndo = [...matchData].sort(() => Math.random() - 0.5);
+
+            matchData.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `foreign-btn-${item.id}`;
+                btn.className = "ifp-btn w-full p-3 rounded-xl border border-blue-200 bg-white font-bold text-xs text-blue-900 shadow-sm transition flex justify-between items-center";
+                btn.innerHTML = `<span><i>${item.foreign}</i></span> <i class="fa-solid fa-hand-pointer text-blue-400"></i>`;
+                btn.onclick = () => selectForeignTerm(item.id);
+                foreignContainer.appendChild(btn);
+            });
+
+            shuffledIndo.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `indo-btn-${item.id}`;
+                btn.className = "ifp-btn w-full p-3 rounded-xl border border-emerald-200 bg-white font-bold text-xs text-emerald-900 shadow-sm transition flex justify-between items-center";
+                btn.innerHTML = `<span>${item.indo}</span> <i class="fa-regular fa-circle text-emerald-300"></i>`;
+                btn.onclick = () => selectIndoTerm(item.id);
+                indoContainer.appendChild(btn);
+            });
+        }
+
+        function selectForeignTerm(id) {
+            if (matchedIds.includes(id)) return;
+            selectedForeignId = id;
+
+            // Reset highlight styles
+            matchData.forEach(item => {
+                const el = document.getElementById(`foreign-btn-${item.id}`);
+                if (el && !matchedIds.includes(item.id)) {
+                    el.className = "ifp-btn w-full p-3 rounded-xl border border-blue-200 bg-white font-bold text-xs text-blue-900 shadow-sm transition flex justify-between items-center";
+                }
+            });
+
+            // Highlight selected
+            const activeEl = document.getElementById(`foreign-btn-${id}`);
+            if (activeEl) {
+                activeEl.className = "ifp-btn w-full p-3 rounded-xl border-2 border-blue-600 bg-blue-100 font-bold text-xs text-blue-900 shadow-md transition flex justify-between items-center";
+            }
+        }
+
+        function selectIndoTerm(id) {
+            if (!selectedForeignId) {
+                showCustomModal("Petunjuk", "Pilih dulu salah satu istilah asing di sebelah kiri!");
+                return;
+            }
+            if (matchedIds.includes(id)) return;
+
+            const feedback = document.getElementById('matchFeedback');
+            feedback.classList.remove('hidden');
+
+            if (selectedForeignId === id) {
+                matchedIds.push(id);
+                feedback.className = "p-3 rounded-xl text-xs font-semibold text-center bg-emerald-100 text-emerald-800 border border-emerald-300";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Pasangan Tepat!`;
+
+                // Lock matched buttons
+                const fBtn = document.getElementById(`foreign-btn-${id}`);
+                const iBtn = document.getElementById(`indo-btn-${id}`);
+                if (fBtn) fBtn.className = "w-full p-3 rounded-xl bg-emerald-500 text-white font-bold text-xs shadow opacity-80 cursor-default flex justify-between items-center";
+                if (iBtn) iBtn.className = "w-full p-3 rounded-xl bg-emerald-500 text-white font-bold text-xs shadow opacity-80 cursor-default flex justify-between items-center";
+
+                selectedForeignId = null;
+
+                if (matchedIds.length === matchData.length) {
+                    confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+                    showCustomModal("Luar Biasa!", "Kamu berhasil mencocokkan seluruh istilah asing dengan padanan Bahasa Indonesia!");
+                }
+            } else {
+                feedback.className = "p-3 rounded-xl text-xs font-semibold text-center bg-rose-100 text-rose-800 border border-rose-300";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Kurang Tepat, coba pilih padanan yang sesuai!`;
+            }
+        }
+
+        function resetMatchSim() {
+            initMatchSim();
+        }
+
+        // Initialize story step on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStoryStep(0);
+        });
+
+        // Game Questions Bank
+        const gameQuestions = {
+            1: [
+                {
+                    difficulty: 'MUDAH',
+                    question: "Apa padanan kata Bahasa Indonesia yang tepat untuk istilah asing 'Download' dalam artikel ilmiah?",
+                    options: ['Unduh', 'Unggah', 'Salin', 'Kirim'],
+                    correct: 0,
+                    explanation: "'Download' memindahkan data dari internet ke komputer lokal, padanannya adalah Unduh."
+                },
+                {
+                    difficulty: 'SEDANG',
+                    question: "Manakah padanan kata yang tepat untuk istilah 'Gadget' dalam pembahasan teknologi populer?",
+                    options: ['Perkakas', 'Gawai', 'Komputer', 'Elektronik'],
+                    correct: 1,
+                    explanation: "'Gadget' secara resmi diserap menjadi kata 'Gawai' dalam Bahasa Indonesia."
+                },
+                {
+                    difficulty: 'SULIT',
+                    question: "Dalam teks ilmu sains, terdapat istilah 'Ecosystem'. Penulisan serapan yang baku menurut EYD adalah...",
+                    options: ['Ekosistem', 'Ekosystim', 'Ekosistemik', 'Ekosystem'],
+                    correct: 0,
+                    explanation: "Akhiran '-system' diserap menjadi '-sistem', sehingga menjadi Ekosistem."
+                }
+            ],
+            2: [
+                {
+                    difficulty: 'MUDAH',
+                    question: "Bagaimanakah format penulisan istilah asing yang belum diserap secara resmi dalam artikel ilmiah populer?",
+                    options: ['Bercetak Miring (Italic)', 'Bercetak Tebal (Bold)', 'Diberi Tanda Petik', 'Hufuf Kapital Semua'],
+                    correct: 0,
+                    explanation: "Istilah bahasa asing yang belum diserap baku harus ditulis dengan huruf miring."
+                },
+                {
+                    difficulty: 'SEDANG',
+                    question: "Manakah kalimat berikut yang penulisan istilah asingnya SUDAH BENAR sesuai kaidah ejaan?",
+                    options: [
+                        "Siswa mengunggah tugas lewat *online*.",
+                        "Siswa mengunggah tugas lewat <i>online</i>.",
+                        "Siswa mengunggah tugas lewat ONLINE.",
+                        "Siswa mengunggah tugas lewat 'online'."
+                    ],
+                    correct: 1,
+                    explanation: "Kata 'online' adalah istilah bahasa Inggris, wajib dicetak miring (<i>online</i>)."
+                },
+                {
+                    difficulty: 'SULIT',
+                    question: "Kalimat: 'Peneliti melakukan *scan* pada sampel jaringan.' Perbaikan kata *scan* menjadi kata baku Bahasa Indonesia adalah...",
+                    options: ['Memindai', 'Mencetak', 'Menyapu', 'Meneropong'],
+                    correct: 0,
+                    explanation: "Kata 'Scan' memiliki padanan kata resmi yaitu 'Pindai' / 'Memindai'."
+                }
+            ],
+            3: [
+                {
+                    difficulty: 'MUDAH',
+                    question: "Manakah dari istilah asing berikut yang berhubungan dengan bidang teknologi informasi?",
+                    options: ['Database', 'Photosynthesis', 'Biodiversity', 'Hypertension'],
+                    correct: 0,
+                    explanation: "'Database' (Basis data) adalah istilah ilmiah dalam bidang TI."
+                },
+                {
+                    difficulty: 'SEDANG',
+                    question: "Mengapa penulis artikel ilmiah populer sering menyertakan istilah asing di samping bahasa Indonesia?",
+                    options: [
+                        'Supaya tulisan terlihat keren',
+                        'Untuk memperjelas konsep teknis yang belum ada istilah populernya',
+                        'Karena tidak tahu bahasa Indonesianya',
+                        'Syarat wajib dari penerbit'
+                    ],
+                    correct: 1,
+                    explanation: "Istilah asing membantu memperjelas makna ilmiah teknis yang spesifik bagi pembaca."
+                },
+                {
+                    difficulty: 'SULIT',
+                    question: "Analisis makna konteks: Kata 'Drive' dalam frase 'Hard Drive' merujuk pada arti...",
+                    options: ['Menyetir kendaraan', 'Perangkat keras penyimpan data', 'Dorongan semangat', 'Jalan raya'],
+                    correct: 1,
+                    explanation: "Dalam konteks komputer, Hard Drive merujuk pada media penyimpanan data digital."
+                }
+            ]
+        };
+
+        // HOTS Quiz Data
+        const hotsQuestions = [
+            {
+                story: "Seorang wartawan muda menulis artikel ilmiah tentang kesehatan mental siswa. Ia menggunakan banyak istilah seperti 'Burnout', 'Mental Health', dan 'Overthinking' tanpa memberikan cetak miring maupun penjelasan padanan bahasa Indonesianya.",
+                question: "Sebagai seorang editor bahasa, kritikan bernalar tinggi yang paling tepat terhadap artikel tersebut adalah...",
+                choices: [
+                    "Artikel tersebut sangat bagus karena menggunakan istilah kekinian yang dimengerti remaja.",
+                    "Artikel kurang komunikatif dan menyalahi EYD karena istilah asing wajib dicetak miring atau diganti padanannya seperti 'Keletihan Mental'.",
+                    "Penulis harus mengganti seluruh kata dalam artikel menjadi bahasa Inggris agar konsisten.",
+                    "Artikel tidak perlu diubah karena pembaca pasti sudah paham artinya."
+                ],
+                correct: 1,
+                explanation: "Penggunaan istilah asing tanpa format cetak miring menyalahi kaidah ejaan baku, serta dapat membingungkan pembaca umum yang belum familiar dengan padanannya."
+            },
+            {
+                story: "Di sebuah majalah sains, terdapat kalimat: 'Proses *photosynthesis* pada tumbuhan membutuhkan cahaya matahari.' Redaksi ingin mengubah istilah asing tersebut agar lebih melestarikan Bahasa Indonesia.",
+                question: "Langkah penyuntingan terbaik yang tepat tanpa mengubah makna ilmiah kalimat tersebut adalah...",
+                choices: [
+                    "Mengganti '*photosynthesis*' menjadi 'Fotosintesis'.",
+                    "Membiarkan kata '*photosynthesis*' tetap bercetak tebal.",
+                    "Menghapus kata '*photosynthesis*' dari kalimat.",
+                    "Mengganti kata tersebut menjadi 'memasak makanan'."
+                ],
+                correct: 0,
+                explanation: "'Fotosintesis' adalah penyerapan baku resmi kata 'photosynthesis' dalam KBBI yang tetap menjaga keakuratan istilah ilmiah."
+            },
+            {
+                story: "Siswa SMPN 2 Jengan Danum membuat mading ilmiah tentang lingkungan. Mereka bingung memilih antara menggunakan kata 'Global Warming' atau 'Pemanasan Global'.",
+                question: "Saran yang paling tepat berdasarkan prinsip keutamaan Bahasa Indonesia dalam artikel populer adalah...",
+                choices: [
+                    "Gunakan 'Global Warming' tanpa cetak miring.",
+                    "Gunakan istilah 'Pemanasan Global' karena sudah ada padanan resminya dalam Bahasa Indonesia.",
+                    "Gunakan kedua kata tersebut secara bersamaan di setiap kalimat.",
+                    "Tidak usah membahas topik tersebut karena terlalu sulit."
+                ],
+                correct: 1,
+                explanation: "Utamakan penggunaan padanan Bahasa Indonesia ('Pemanasan Global') untuk menjaga keutamaan bahasa nasional dalam karya ilmiah populer."
+            }
+        ];
+
+        let currentHotsIndex = 0;
+        let hotsScore = 0;
+
+        // --- USER INFO & NAVIGATION LOGIC ---
+        function saveUserInfo(event) {
+            event.preventDefault();
+            const name = document.getElementById('inputName').value.trim();
+            const school = document.getElementById('inputSchool').value.trim();
+
+            if (!name || !school) return;
+
+            currentStudent.name = name;
+            currentStudent.school = school;
+
+            // Update Header & Menu UI
+            document.getElementById('headerStudentName').innerText = name;
+            document.getElementById('headerStudentSchool').innerText = school;
+            document.getElementById('menuStudentName').innerText = name;
+
+            document.getElementById('userInfoHeader').classList.remove('hidden');
+            document.getElementById('page-welcome').classList.add('hidden');
+            document.getElementById('appContent').classList.remove('hidden');
+
+            // Default Open First Tab
+            switchTab('tujuan');
+        }
+
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            
+            // Reset button active state
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-700', 'text-white');
+                btn.classList.add('text-slate-300');
+            });
+
+            // Show current tab
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if(targetTab) targetTab.classList.remove('hidden');
+
+            // Active Nav Styling
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if(activeNav) {
+                activeNav.classList.add('bg-slate-700', 'text-white');
+                activeNav.classList.remove('text-slate-300');
+            }
+
+            // Init Hots quiz if switched to hots
+            if (tabId === 'hots' && currentHotsIndex === 0) {
+                loadHotsQuestion(0);
+            }
+        }
+
+        // --- MATERI INTERACTIVE FEATURE ---
+        function showTermInfo(original, indo, desc) {
+            const infoBox = document.getElementById('termInfoBox');
+            document.getElementById('termOriginal').innerText = original;
+            document.getElementById('termIndo').innerText = "Padanan: " + indo;
+            document.getElementById('termDesc').innerText = desc;
+            
+            infoBox.classList.remove('hidden');
+        }
+
+        // --- ADVENTURE GAME LOGIC ---
+        function startLevel(lvl) {
+            currentLevel = lvl;
+            // find first uncompleted challenge in this level
+            const levelData = adventureProgress[`level${lvl}`];
+            let challengeToStart = levelData.findIndex(val => val === false);
+            if(challengeToStart === -1) challengeToStart = 0; // if all complete, restart first
+
+            currentChallengeIndex = challengeToStart;
+            showChallengeQuestion();
+        }
+
+        function showChallengeQuestion() {
+            document.getElementById('levelSelector').classList.add('hidden');
+            document.getElementById('gamePlayArea').classList.remove('hidden');
+
+            const diffNames = ['MUDAH', 'SEDANG', 'SULIT'];
+            const diffColors = ['bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-rose-100 text-rose-700'];
+
+            const qData = gameQuestions[currentLevel][currentChallengeIndex];
+
+            document.getElementById('gameCurrentTitle').innerText = `Level ${currentLevel} - Tantangan ${currentChallengeIndex + 1}/3`;
+            const diffBadge = document.getElementById('difficultyBadge');
+            diffBadge.innerText = diffNames[currentChallengeIndex];
+            diffBadge.className = `text-xs font-bold px-2.5 py-0.5 rounded-full ${diffColors[currentChallengeIndex]}`;
+
+            document.getElementById('gameQuestionText').innerText = qData.question;
+
+            // Render Options
+            const container = document.getElementById('gameOptionsContainer');
+            container.innerHTML = '';
+            document.getElementById('gameFeedback').classList.add('hidden');
+
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "ifp-btn w-full text-left p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 font-medium text-sm text-slate-800 transition flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-slate-300"></i>`;
+                btn.onclick = () => checkGameAnswer(idx, qData.correct, qData.explanation);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkGameAnswer(selectedIndex, correctIndex, explanation) {
+            const feedback = document.getElementById('gameFeedback');
+            feedback.classList.remove('hidden');
+
+            if (selectedIndex === correctIndex) {
+                feedback.className = "mt-4 p-4 rounded-xl text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check text-base mr-1"></i> <b>BENAR!</b> ${explanation}`;
+                
+                // Mark complete
+                adventureProgress[`level${currentLevel}`][currentChallengeIndex] = true;
+                updateProgressUI();
+
+                // Trigger Confetti for level up
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+
+                setTimeout(() => {
+                    if (currentChallengeIndex < 2) {
+                        currentChallengeIndex++;
+                        showChallengeQuestion();
+                    } else {
+                        showCustomModal("Selamat!", `Kamu berhasil menyelesaikan seluruh tantangan di Level ${currentLevel}!`);
+                        backToLevelSelect();
+                    }
+                }, 1800);
+
+            } else {
+                feedback.className = "mt-4 p-4 rounded-xl text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark text-base mr-1"></i> <b>KURANG TEPAT!</b> Coba analisa lagi. ${explanation}`;
+            }
+        }
+
+        function backToLevelSelect() {
+            document.getElementById('gamePlayArea').classList.add('hidden');
+            document.getElementById('levelSelector').classList.remove('hidden');
+        }
+
+        function updateProgressUI() {
+            let totalCompleted = 0;
+            // Level 1
+            const lvl1Done = adventureProgress.level1.filter(Boolean).length;
+            document.getElementById('badge-lvl1').innerText = `${lvl1Done}/3 Selesai`;
+            totalCompleted += lvl1Done;
+
+            // Level 2 unlock check
+            if (lvl1Done === 3) {
+                document.getElementById('lock-lvl2').classList.add('hidden');
+                document.getElementById('card-level-2').classList.remove('opacity-60');
+                document.getElementById('btn-lvl2').removeAttribute('disabled');
+            }
+            const lvl2Done = adventureProgress.level2.filter(Boolean).length;
+            document.getElementById('badge-lvl2').innerText = `${lvl2Done}/3 Selesai`;
+            totalCompleted += lvl2Done;
+
+            // Level 3 unlock check
+            if (lvl2Done === 3) {
+                document.getElementById('lock-lvl3').classList.add('hidden');
+                document.getElementById('card-level-3').classList.remove('opacity-60');
+                document.getElementById('btn-lvl3').removeAttribute('disabled');
+            }
+            const lvl3Done = adventureProgress.level3.filter(Boolean).length;
+            document.getElementById('badge-lvl3').innerText = `${lvl3Done}/3 Selesai`;
+            totalCompleted += lvl3Done;
+
+            // Calculate percentage
+            const percentage = Math.round((totalCompleted / 9) * 100);
+            document.getElementById('overallProgressBar').style.width = `${percentage}%`;
+            document.getElementById('adventureProgressBadge').innerText = `${percentage}%`;
+        }
+
+        // --- HOTS QUIZ LOGIC ---
+        function loadHotsQuestion(index) {
+            currentHotsIndex = index;
+            const q = hotsQuestions[index];
+
+            document.getElementById('hotsStoryText').innerText = q.story;
+            document.getElementById('hotsQuestionText').innerText = q.question;
+            document.getElementById('hotsCounter').innerText = `Soal ${index + 1} dari ${hotsQuestions.length}`;
+            document.getElementById('hotsFeedback').classList.add('hidden');
+            document.getElementById('btnNextHots').disabled = true;
+
+            const container = document.getElementById('hotsChoicesContainer');
+            container.innerHTML = '';
+
+            q.choices.forEach((choice, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "hots-choice-btn ifp-btn w-full text-left p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs text-slate-700 font-medium transition flex items-start space-x-3";
+                btn.innerHTML = `<span class="bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded text-[10px] mt-0.5">${String.fromCharCode(65 + idx)}</span> <span class="flex-1">${choice}</span>`;
+                btn.onclick = () => checkHotsAnswer(idx, q.correct, q.explanation, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkHotsAnswer(selected, correct, exp, clickedBtn) {
+            // Disable all choices
+            document.querySelectorAll('.hots-choice-btn').forEach(b => b.disabled = true);
+
+            const feedback = document.getElementById('hotsFeedback');
+            feedback.classList.remove('hidden');
+
+            if (selected === correct) {
+                clickedBtn.classList.add('bg-emerald-50', 'border-emerald-400');
+                feedback.className = "p-4 rounded-xl text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300";
+                feedback.innerHTML = `<i class="fa-solid fa-check-circle mr-1 text-sm"></i> <b>Jawaban Tepat!</b> ${exp}`;
+                hotsScore += 33.3;
+                if (currentHotsIndex === hotsQuestions.length - 1) hotsScore = 100; // Round up last
+                document.getElementById('hotsScore').innerText = Math.round(hotsScore);
+            } else {
+                clickedBtn.classList.add('bg-rose-50', 'border-rose-400');
+                feedback.className = "p-4 rounded-xl text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300";
+                feedback.innerHTML = `<i class="fa-solid fa-times-circle mr-1 text-sm"></i> <b>Penalaran Kurang Tepat.</b> ${exp}`;
+            }
+
+            document.getElementById('btnNextHots').disabled = false;
+        }
+
+        function nextHotsQuestion() {
+            if (currentHotsIndex < hotsQuestions.length - 1) {
+                loadHotsQuestion(currentHotsIndex + 1);
+            } else {
+                showCustomModal("Tantangan HOTS Selesai!", `Skor akhir kamu: ${Math.round(hotsScore)} / 100. Luar biasa!`);
+            }
+        }
+
+        // --- REFLEKSI LOGIC ---
+        let selectedEmotion = '';
+        function selectEmoji(btn, emotion) {
+            document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('bg-pink-100', 'border-pink-400'));
+            btn.classList.add('bg-pink-100', 'border-pink-400');
+            selectedEmotion = emotion;
+        }
+
+        function saveReflection() {
+            const notes = document.getElementById('reflectionNotes').value.trim();
+            if (!selectedEmotion) {
+                showCustomModal("Info", "Silakan pilih salah satu emotikon tingkat pemahamanmu!");
+                return;
+            }
+            showCustomModal("Refleksi Tersimpan", `Terima kasih ${currentStudent.name}! Refleksi kamu berhasil dicatat.`);
+        }
+
+        // --- FULLSCREEN TOGGLE FOR IFP ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Gagal layar penuh: ${err.message}`);
+                });
+                document.getElementById('fullscreenIcon').className = "fa-solid fa-compress text-lg";
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    document.getElementById('fullscreenIcon').className = "fa-solid fa-expand text-lg";
+                }
+            }
+        }
+
+        // --- CUSTOM MODAL FUNCTION ---
+        function showCustomModal(title, msg) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = msg;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
